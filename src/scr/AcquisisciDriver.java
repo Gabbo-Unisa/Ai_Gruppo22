@@ -164,15 +164,46 @@ public class AcquisisciDriver extends Controller {
     }
 
     public Action control(SensorModel sensors) {
-
-
-        // Costruire una variabile CarControl e restituirla
+        // Creazione di un nuovo oggetto Action
         Action action = new Action();
-        action.gear = gear;
-        action.steering = steer;
-        action.accelerate = accel;
-        action.brake = brake;
+
+        // Calcolo della marcia
+        int gear = getGear(sensors);
+
+        // Calcolo dello sterzo
+        double steering = 0;
+        if (steerRight) {
+            steering = -0.3;
+        } else if (steerLeft) {
+            steering = 0.3;
+        }
+
+        // Calcolo dell'accelerazione e frenata
+        double accelerate = 0;
+        double brk = 0;
+
+        if (brake) {
+            if (sensors.getSpeed() < 1) {
+                // se sono fermo, vado in retromarcia
+                gear = -1;
+                accelerate = 1.0;
+            } else {
+                // se sono in corsa, freno
+                brk = 1.0;
+            }
+        }
+
+        // Calcolo della frizione
+        clutch = clutching(sensors, clutch);
+
+        // Costruire una variabile CarControl
+        action.accelerate = accelerate;
+        action.brake = filterABS(sensors, (float) brk);
+        action.steering = steering;
         action.clutch = clutch;
+        action.gear = gear;
+
+        // Restituzione dell'azione calcolata
         return action;
     }
 
