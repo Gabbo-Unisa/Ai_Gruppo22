@@ -236,4 +236,16 @@ public class AcquisisciDriver extends Controller {
         angles[9] = 0;
         return angles;
     }
+
+    public void setAccel(boolean b) {
+    }
+
+    public void setBrake(boolean b) {
+    }
+
+    public void setSteerLeft(boolean b) {
+    }
+
+    public void setSteerRight(boolean b) {
+    }
 }
