@@ -1,6 +1,11 @@
 package scr;
 
+import javax.swing.*;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class AcquisisciDriver extends Controller {
+    private FileWriter csvWriter;
 
     /* Costanti di cambio marcia */
     final int[] gearUp = { 5000, 6000, 6000, 6500, 7000, 0 };
@@ -37,12 +42,21 @@ public class AcquisisciDriver extends Controller {
     final float clutchMaxModifier = (float) 1.3;
     final float clutchMaxTime = (float) 1.5;
 
-
-
     private int stuck = 0;
 
     // current clutch
     private float clutch = 0;
+
+    public AcquisisciDriver() {
+        SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
+        try {
+            csvWriter = new FileWriter("driving_data.csv");
+            csvWriter.append("angle;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void reset() {
         System.out.println("Restarting the race!");
@@ -51,6 +65,11 @@ public class AcquisisciDriver extends Controller {
 
     public void shutdown() {
         System.out.println("Bye bye!");
+        try {
+            csvWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int getGear(SensorModel sensors) {

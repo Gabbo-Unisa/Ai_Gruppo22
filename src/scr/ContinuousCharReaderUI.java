@@ -77,12 +77,4 @@ public class ContinuousCharReaderUI extends JFrame {
         // Make the frame visible
         setVisible(true);
     }
-
-    public static void main(String[] args) {
-        // Run the UI in the Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(() -> {
-            AcquisisciDriver acquisisciDriver = new AcquisisciDriver();
-            new ContinuousCharReaderUI(acquisisciDriver);
-        });
-    }
 }
