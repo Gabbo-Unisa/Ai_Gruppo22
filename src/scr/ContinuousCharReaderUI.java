@@ -18,27 +18,34 @@ public class ContinuousCharReaderUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
-        // Initialize the text field for input
+        // Creo un JTextField ma lo rendo “invisibile”
         inputField = new JTextField(20);
+        /*
+        inputField.setFocusable(true);              // deve poter catturare i tasti
+        inputField.setOpaque(false);                // trasparente
+        inputField.setBorder(null);
+        inputField.setForeground(getBackground());  // testo invisibile
+        inputField.setCaretColor(getBackground());  // caret invisibile
+         */
         add(inputField);
 
         // Add key listener to the text field
         inputField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 char ch = e.getKeyChar();
 
                 switch (ch) {
-                    case 'x':
+                    case 'w':
                         acquisisciDriver.setAccel(true);
                         break;
-                    case 'z':
+                    case 's':
                         acquisisciDriver.setBrake(true);
                         break;
-                    case 'j':
+                    case 'a':
                         acquisisciDriver.setSteerLeft(true);
                         break;
-                    case 'l':
+                    case 'd':
                         acquisisciDriver.setSteerRight(true);
                         break;
                     case 'q':
@@ -55,10 +62,10 @@ public class ContinuousCharReaderUI extends JFrame {
                 char ch = e.getKeyChar();
 
                 switch (ch) {
-                    case ',':
+                    case 'w':
                         acquisisciDriver.setAccel(false);
                         break;
-                    case '.':
+                    case 's':
                         acquisisciDriver.setBrake(false);
                         break;
                     case 'a':
