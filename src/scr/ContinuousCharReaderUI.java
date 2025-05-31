@@ -6,9 +6,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class ContinuousCharReaderUI extends JFrame {
+    private SimpleDriver simpleDriver;
     private JTextField inputField;
 
-    public ContinuousCharReaderUI() {
+    public ContinuousCharReaderUI(SimpleDriver simpleDriver) {
+        this.simpleDriver = simpleDriver;
+
         // Set up the frame
         setTitle("Continuous Character Reader");
         setSize(300, 100);
@@ -24,14 +27,49 @@ public class ContinuousCharReaderUI extends JFrame {
             @Override
             public void keyTyped(KeyEvent e) {
                 char ch = e.getKeyChar();
-                System.out.println("You pressed: " + ch);
+
+                switch (ch) {
+                    case 'x':
+                        simpleDriver.setAccel(true);
+                        break;
+                    case 'z':
+                        simpleDriver.setBrake(true);
+                        break;
+                    case 'j':
+                        simpleDriver.setSteerLeft(true);
+                        break;
+                    case 'l':
+                        simpleDriver.setSteerRight(true);
+                        break;
+                    case 'q':
+                        System.exit(0);
+                        break;
+                }
 
                 // Clear the text field
                 inputField.setText("");
+            }
 
-                // Exit if 'q' is pressed
-                if (ch == 'q') {
-                    System.exit(0);
+            @Override
+            public void keyReleased(KeyEvent e) {
+                char ch = e.getKeyChar();
+
+                switch (ch) {
+                    case 'x':
+                        simpleDriver.setAccel(false);
+                        break;
+                    case 'z':
+                        simpleDriver.setBrake(false);
+                        break;
+                    case 'j':
+                        simpleDriver.setSteerLeft(false);
+                        break;
+                    case 'l':
+                        simpleDriver.setSteerRight(false);
+                        break;
+                    case 'q':
+                        System.exit(0);
+                        break;
                 }
             }
         });
@@ -42,6 +80,9 @@ public class ContinuousCharReaderUI extends JFrame {
 
     public static void main(String[] args) {
         // Run the UI in the Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI());
+        SwingUtilities.invokeLater(() -> {
+            SimpleDriver simpleDriver = new SimpleDriver();
+            new ContinuousCharReaderUI(simpleDriver);
+        });
     }
 }
