@@ -182,6 +182,10 @@ public class AcquisisciDriver extends Controller {
         double accelerate = 0;
         double brk = 0;
 
+        if (accel) {
+            accelerate = 1.0;
+        }
+
         if (brake) {
             if (sensors.getSpeed() < 1) {
                 // se sono fermo, vado in retromarcia
