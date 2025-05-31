@@ -16,9 +16,10 @@ public class NearestNeighbor {
 
     public NearestNeighbor(String filename) {
         this.trainingData = new ArrayList<>();
-        this.classCounts = new int[]; //Aggiungi tra le parentesi quadre il numero di classi fatte
-        this.firstLineOfTheFile = "";//aggiungi tra le virgolette i nomi dei sensori utilizzati nella prima riga del dataset
-
+        this.kdtree = null;
+        this.classCounts = new int[9]; // Assumiamo 9 classi, da 0 a 8
+        this.firstLineOfTheFile = "angle,speedX,track_0,track_1,track_2,track_3,track_4,track_5,track_6,track_7," +
+                                  "track_8,track_9,track_10,track_11,track_12,track_13,track_14,track_15,track_16,track_17,track_18,trackPos,class";
         this.readPointsFromCSV(filename);
         normalizeData();
         this.kdtree = new KDTree(trainingData);
