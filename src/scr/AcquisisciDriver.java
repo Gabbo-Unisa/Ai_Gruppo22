@@ -7,11 +7,17 @@ import java.io.IOException;
 public class AcquisisciDriver extends Controller {
     private FileWriter csvWriter;
 
+    /* Controlli dell'utente */
+    private boolean accel;
+    private boolean brake;
+    private boolean steerLeft;
+    private boolean steerRight;
+
     /* Costanti di cambio marcia */
     final int[] gearUp = { 5000, 6000, 6000, 6500, 7000, 0 };
     final int[] gearDown = { 0, 2500, 3000, 3000, 3500, 3500 };
 
-    /* Constanti */
+    /* Costanti */
     final int stuckTime = 25;
     final float stuckAngle = (float) 0.523598775; // PI/6
 
@@ -256,15 +262,49 @@ public class AcquisisciDriver extends Controller {
         return angles;
     }
 
-    public void setAccel(boolean b) {
+    public int determinaClasse(boolean accel, boolean brake, boolean steerLeft, boolean steerRight) {
+        boolean steering = steerLeft || steerRight;
+
+        if (!brake) {   // diamo priorità alla frenata
+            if (accel) {
+                if (!steering) {
+                    return 0;   // accelerazione, nessuna sterzata
+                } else if (steerLeft) {
+                    return 1;   // accelerazione, con sterzata sx
+                } else if (steerRight) {
+                    return 2;   // accelerazione, con sterzata dx
+                }
+            } else if (!steering) {
+                return 3;   // nessun comando
+            } else if (steerLeft) {
+                return 4;   // solo sterzata sx
+            } else if (steerRight) {
+                return 5;   // solo sterzata dx
+            }
+        } else if (!steering) {
+            return 6;   // frenata, nessuna sterzata
+        } else if (steerLeft) {
+            return 7;   // frenata, con sterzata sx
+        } else if (steerRight) {
+            return 8;   // frenata, con sterzata dx
+        }
+
+        return -1;  // comando sconosciuto
     }
 
-    public void setBrake(boolean b) {
+    public void setAccel(boolean accel) {
+        this.accel = accel;
     }
 
-    public void setSteerLeft(boolean b) {
+    public void setBrake(boolean brake) {
+        this.brake = brake;
     }
 
-    public void setSteerRight(boolean b) {
+    public void setSteerLeft(boolean steerLeft) {
+        this.steerLeft = steerLeft;
+    }
+
+    public void setSteerRight(boolean steerRight) {
+        this.steerRight = steerRight;
     }
 }
