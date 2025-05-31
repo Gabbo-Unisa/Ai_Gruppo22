@@ -8,7 +8,7 @@ public class Sample {
         Costruttore 1: per inizializzare il campione con un dato insieme di
         caratteristiche e l'etichetta della classe.
         Utilizzato quando si costruisce il set di dati.
-     */
+    */
     public Sample(double[] features, int cls) {
         this.features = features;
         this.cls = cls;
@@ -39,8 +39,10 @@ public class Sample {
     }
 
     /*
-        Costruttore 4: per inizializzare i parametri di interesse per TORCS
-     */
+        Costruttore 4: specifico per TORCS con tutte le informazioni: angolo, velocità, sensori
+                       e posizione sulla pista, più la classe. 
+                       Usato per creare campioni etichettati (fase di training).
+    */
     public Sample(double angle, double speedX, double[] edgeSensors, double trackPosition, int cls) {
         this.features = new double[edgeSensors.length + 3];
         this.features[0] = angle;
@@ -51,11 +53,19 @@ public class Sample {
     }
 
     /*
-        Costruttore 5:
-     */
+        Costruttore 5: variante del costruttore per TORCS usata nella fase di test o guida autonoma:
+                       NON richiede una classe, perché verrà predetta dal classificatore.
+                       Imposta cls = -1 come valore di default.
+    */
     public Sample(double angle, double speedX, double[] edgeSensors, double trackPosition) {
         this(angle, speedX, edgeSensors, trackPosition, -1);
     }
+
+    /*
+        Metodo per ottenere le caratteristiche del campione.
+        Utile per accedere ai dati del campione.
+    */
+    public double[] getFeatures() { return features; }
 
     /*
         Metodo per calcolare la distanza euclidea tra due campioni
