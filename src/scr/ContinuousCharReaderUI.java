@@ -55,16 +55,16 @@ public class ContinuousCharReaderUI extends JFrame {
                 char ch = e.getKeyChar();
 
                 switch (ch) {
-                    case 'x':
+                    case ',':
                         acquisisciDriver.setAccel(false);
                         break;
-                    case 'z':
+                    case '.':
                         acquisisciDriver.setBrake(false);
                         break;
-                    case 'j':
+                    case 'a':
                         acquisisciDriver.setSteerLeft(false);
                         break;
-                    case 'l':
+                    case 'd':
                         acquisisciDriver.setSteerRight(false);
                         break;
                     case 'q':
