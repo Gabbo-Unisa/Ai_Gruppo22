@@ -1,11 +1,11 @@
 package scr;
 
 import javax.swing.*;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.sql.Struct;
 
 public class AcquisisciDriver extends Controller {
-    private FileWriter csvWriter;
+    private PrintWriter csvWriter;// Devo provare a tornare ad usare FileWriter
 
     /* Controlli dell'utente */
     private boolean accel;
@@ -56,7 +56,7 @@ public class AcquisisciDriver extends Controller {
     public AcquisisciDriver() {
         SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
         try {
-            csvWriter = new FileWriter("driving_data.csv");
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data.csv")));
             csvWriter.append("angle;curLapTime;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,11 +71,7 @@ public class AcquisisciDriver extends Controller {
 
     public void shutdown() {
         System.out.println("Bye bye!");
-        try {
-            csvWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        csvWriter.close();
     }
 
     private int getGear(SensorModel sensors) {
@@ -163,53 +159,7 @@ public class AcquisisciDriver extends Controller {
             return (float) 0.3;
     }
 
-    public Action control(SensorModel sensors) {
-        // Creazione di un nuovo oggetto Action
-        Action action = new Action();
 
-        // Calcolo della marcia
-        int gear = getGear(sensors);
-
-        // Calcolo dello sterzo
-        double steering = 0;
-        if (steerRight) {
-            steering = -0.3;
-        } else if (steerLeft) {
-            steering = 0.3;
-        }
-
-        // Calcolo dell'accelerazione e frenata
-        double accelerate = 0;
-        double brk = 0;
-
-        if (accel) {
-            accelerate = 1.0;
-        }
-
-        if (brake) {
-            if (sensors.getSpeed() < 1) {
-                // se sono fermo, vado in retromarcia
-                gear = -1;
-                accelerate = 1.0;
-            } else {
-                // se sono in corsa, freno
-                brk = 1.0;
-            }
-        }
-
-        // Calcolo della frizione
-        clutch = clutching(sensors, clutch);
-
-        // Costruire una variabile CarControl
-        action.accelerate = accelerate;
-        action.brake = filterABS(sensors, (float) brk);
-        action.steering = steering;
-        action.clutch = clutch;
-        action.gear = gear;
-
-        // Restituzione dell'azione calcolata
-        return action;
-    }
 
     private float filterABS(SensorModel sensors, float brake) {
         // Converte la velocità in m/s
@@ -325,6 +275,69 @@ public class AcquisisciDriver extends Controller {
         }
 
         return -1;  // comando sconosciuto
+    }
+
+    public Action control(SensorModel sensors) {
+        // Creazione di un nuovo oggetto Action
+        Action action = new Action();
+
+        // Calcolo della marcia
+        int gear = getGear(sensors);
+
+        // Calcolo dello sterzo
+        double steering = 0;
+        if (steerRight) {
+            steering = -0.3;
+        } else if (steerLeft) {
+            steering = 0.3;
+        }
+
+        // Calcolo dell'accelerazione e frenata
+        double accelerate = 0;
+        double brk = 0;
+
+        if (accel) {
+            accelerate = 1.0;
+        }
+
+        if (brake) {
+            if (sensors.getSpeed() < 1) {
+                // se sono fermo, vado in retromarcia
+                gear = -1;
+                accelerate = 1.0;
+            } else {
+                // se sono in corsa, freno
+                brk = 1.0;
+            }
+        }
+
+        // Calcolo della frizione
+        clutch = clutching(sensors, clutch);
+
+        // Costruire una variabile CarControl
+        action.accelerate = accelerate;
+        action.brake = filterABS(sensors, (float) brk);
+        action.steering = steering;
+        action.clutch = clutch;
+        action.gear = gear;
+
+        // Scrivo i sensori e le azioni del giocatore su un file CSV
+        csvWriter.print(sensors.getAngleToTrackAxis() + ";");
+        csvWriter.print(sensors.getCurrentLapTime() + ";");
+        csvWriter.print(sensors.getDistanceRaced() + ";");
+        csvWriter.print(sensors.getDistanceFromStartLine() + ";");
+        csvWriter.print(sensors.getSpeed() + ";");
+        csvWriter.print(sensors.getLateralSpeed() + ";");
+        for (int i = 0; i < sensors.getTrackEdgeSensors().length; i++) {
+            csvWriter.print(sensors.getTrackEdgeSensors()[i] + ";");
+        }
+        csvWriter.print(sensors.getTrackPosition() + ";");
+        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight) + "\n");
+
+        /*csvWriter.flush();*/
+
+        // Restituzione dell'azione calcolata
+        return action;
     }
 
     public void setAccel(boolean accel) {
