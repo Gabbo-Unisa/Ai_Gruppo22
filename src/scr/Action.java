@@ -47,7 +47,7 @@ public class Action {
 		brake = Math.max(0, Math.min(1, brake));
 		clutch = Math.max(0, Math.min(1, clutch));
 		steering = Math.max(-1, Math.min(1, steering));
-		gear = Math.max(-1, Math.min(6, gear));
+		gear = Math.max(-1, Math.min(7, gear));
 
 	}
 }

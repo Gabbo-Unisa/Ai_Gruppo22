@@ -18,15 +18,9 @@ public class ContinuousCharReaderUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
-        // Creo un JTextField ma lo rendo “invisibile”
+        // Initialize the text field for input
         inputField = new JTextField(20);
-        /*
-        inputField.setFocusable(true);              // deve poter catturare i tasti
-        inputField.setOpaque(false);                // trasparente
-        inputField.setBorder(null);
-        inputField.setForeground(getBackground());  // testo invisibile
-        inputField.setCaretColor(getBackground());  // caret invisibile
-         */
+
         add(inputField);
 
         // Add key listener to the text field
@@ -36,10 +30,10 @@ public class ContinuousCharReaderUI extends JFrame {
                 char ch = e.getKeyChar();
 
                 switch (ch) {
-                    case 'w':
+                    case ',':
                         acquisisciDriver.setAccel(true);
                         break;
-                    case 's':
+                    case '.':
                         acquisisciDriver.setBrake(true);
                         break;
                     case 'a':
@@ -62,10 +56,10 @@ public class ContinuousCharReaderUI extends JFrame {
                 char ch = e.getKeyChar();
 
                 switch (ch) {
-                    case 'w':
+                    case ',':
                         acquisisciDriver.setAccel(false);
                         break;
-                    case 's':
+                    case '.':
                         acquisisciDriver.setBrake(false);
                         break;
                     case 'a':
