@@ -3,6 +3,7 @@ package scr;
 import javax.swing.*;
 import java.io.*;
 import java.sql.Struct;
+import java.util.Locale;
 
 public class AcquisisciDriver extends Controller {
     private PrintWriter csvWriter;// Devo provare a tornare ad usare FileWriter
@@ -56,7 +57,7 @@ public class AcquisisciDriver extends Controller {
     public AcquisisciDriver() {
         SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
         try {
-            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data.csv")));
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data%2f.csv")));
             csvWriter.append("angle;curLapTime;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -287,9 +288,9 @@ public class AcquisisciDriver extends Controller {
         // Calcolo dello sterzo
         double steering = 0;
         if (steerRight) {
-            steering = -0.3;
+            steering = -0.25;
         } else if (steerLeft) {
-            steering = 0.3;
+            steering = 0.25;
         }
 
         // Calcolo dell'accelerazione e frenata
@@ -297,14 +298,14 @@ public class AcquisisciDriver extends Controller {
         double brk = 0;
 
         if (accel) {
-            accelerate = 1.0;
+            accelerate = 0.8;
         }
 
         if (brake) {
             if (sensors.getSpeed() < 1) {
                 // se sono fermo, vado in retromarcia
                 gear = -1;
-                accelerate = 1.0;
+                accelerate = 0.8;
             } else {
                 // se sono in corsa, freno
                 brk = 1.0;
@@ -322,7 +323,7 @@ public class AcquisisciDriver extends Controller {
         action.gear = gear;
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
-        csvWriter.print(sensors.getAngleToTrackAxis() + ";");
+        /*csvWriter.print(sensors.getAngleToTrackAxis() + ";");
         csvWriter.print(sensors.getCurrentLapTime() + ";");
         csvWriter.print(sensors.getDistanceRaced() + ";");
         csvWriter.print(sensors.getDistanceFromStartLine() + ";");
@@ -332,9 +333,25 @@ public class AcquisisciDriver extends Controller {
             csvWriter.print(sensors.getTrackEdgeSensors()[i] + ";");
         }
         csvWriter.print(sensors.getTrackPosition() + ";");
-        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight) + "\n");
+        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight) + "\n");*/
 
-        /*csvWriter.flush();*/
+
+
+        csvWriter.format("%.2f;", sensors.getAngleToTrackAxis());
+        csvWriter.format("%.2f;", sensors.getCurrentLapTime());
+        csvWriter.format("%.2f;", sensors.getDistanceRaced());
+        csvWriter.format("%.2f;", sensors.getDistanceFromStartLine());
+        csvWriter.format("%.2f;", sensors.getSpeed());
+        csvWriter.format("%.2f;", sensors.getLateralSpeed());
+        for (double edgeSensor : sensors.getTrackEdgeSensors()) {
+            csvWriter.format(Locale.US, "%.2f;", edgeSensor);
+        }
+        csvWriter.format(Locale.US, "%.2f;", sensors.getTrackPosition());
+        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight));
+
+        csvWriter.println("");
+
+        csvWriter.flush();
 
         // Restituzione dell'azione calcolata
         return action;
