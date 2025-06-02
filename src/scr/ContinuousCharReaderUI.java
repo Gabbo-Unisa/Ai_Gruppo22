@@ -42,6 +42,12 @@ public class ContinuousCharReaderUI extends JFrame {
                     case 'd':
                         acquisisciDriver.setSteerRight(true);
                         break;
+                    case 'q':
+                        acquisisciDriver.setSteerLilLeft(true);
+                        break;
+                    case 'e':
+                        acquisisciDriver.setSteerLilRight(true);
+                        break;
                     case 'm':
                         System.exit(0);
                         break;
@@ -67,6 +73,12 @@ public class ContinuousCharReaderUI extends JFrame {
                         break;
                     case 'd':
                         acquisisciDriver.setSteerRight(false);
+                        break;
+                    case 'q':
+                        acquisisciDriver.setSteerLilLeft(false);
+                        break;
+                    case 'e':
+                        acquisisciDriver.setSteerLilRight(false);
                         break;
                     case 'm':
                         System.exit(0);
