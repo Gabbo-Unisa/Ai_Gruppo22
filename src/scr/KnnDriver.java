@@ -264,7 +264,6 @@ public class KnnDriver extends Controller {
         Sample sample = new Sample(
                 sensors.getAngleToTrackAxis(),
                 sensors.getCurrentLapTime(),
-                sensors.getDistanceRaced(),
                 sensors.getDistanceFromStartLine(),
                 sensors.getSpeed(),
                 sensors.getLateralSpeed(),

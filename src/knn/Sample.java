@@ -43,28 +43,18 @@ public class Sample {
 
         for (int i = 0; i < n - 1; i++) {
             try {
-                // Utilizza il NumberFormat configurato per fare il parsing della stringa in un numero,
-                // quindi ottieni il valore double.
+                // Utilizza il NumberFormat configurato per fare il parsing della stringa in un numero
                 features[i] = format.parse(parts[i].trim()).doubleValue();
             } catch (ParseException e) {
-                System.err.println("Errore nel parsing del numero: '" + parts[i].trim() + "' nella riga: '" + line + "'. Impostato a 0.0.");
-                // In caso di errore di parsing (es. stringa non numerica inaspettata),
-                // stampa un messaggio di errore e imposta la feature a 0.0 come fallback.
-                // Considera se un'altra gestione dell'errore è più appropriata per il tuo caso (es. lanciare un'eccezione).
-                features[i] = 0.0;
                 e.printStackTrace(); // Stampa lo stack trace dell'errore per debug
-            } catch (NumberFormatException nfe) {
-                System.err.println("Errore NumberFormatException per: '" + parts[i].trim() + "' nella riga: '" + line + "'. Impostato a 0.0.");
-                features[i] = 0.0;
-                nfe.printStackTrace();
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
         }
-        // L'etichetta della classe (cls) è un intero, quindi Integer.parseInt dovrebbe andare bene
-        // a meno che anche questo non contenga separatori di migliaia inaspettati (improbabile per un ID di classe).
+
         try {
             this.cls = Integer.parseInt(parts[n - 1].trim());
         } catch (NumberFormatException e) {
-            System.err.println("Errore nel parsing della classe: '" + parts[n - 1].trim() + "' nella riga: '" + line + "'. Impostata a -1.");
             this.cls = -1; // Valore di default in caso di errore
             e.printStackTrace();
         }
@@ -75,15 +65,14 @@ public class Sample {
                        e posizione sulla pista, più la classe. 
                        Usato per creare campioni etichettati (fase di training).
     */
-    public Sample(double angle, double curLapTime, double distRaced, double distFromStart, double speedX, double speedY, double[] edgeSensors, double trackPosition, int cls) {
-        this.features = new double[edgeSensors.length + 7];
+    public Sample(double angle, double curLapTime, double distFromStart, double speedX, double speedY, double[] edgeSensors, double trackPosition, int cls) {
+        this.features = new double[edgeSensors.length + 6];
         this.features[0] = angle;
         this.features[1] = curLapTime;
-        this.features[2] = distRaced;
-        this.features[3] = distFromStart;
-        this.features[4] = speedX;
-        this.features[5] = speedY;
-        System.arraycopy(edgeSensors, 0, this.features, 6, edgeSensors.length);
+        this.features[2] = distFromStart;
+        this.features[3] = speedX;
+        this.features[4] = speedY;
+        System.arraycopy(edgeSensors, 0, this.features, 5, edgeSensors.length);
         this.features[features.length - 1] = trackPosition;
         this.cls = cls;
     }
@@ -93,8 +82,8 @@ public class Sample {
                        NON richiede una classe, perché verrà predetta dal classificatore.
                        Imposta cls = -1 come valore di default.
     */
-    public Sample(double angle, double curLapTime, double distRaced, double distFromStart, double speedX, double speedY, double[] edgeSensors, double trackPosition) {
-        this(angle, curLapTime, distRaced, distFromStart, speedX, speedY, edgeSensors, trackPosition, -1);
+    public Sample(double angle, double curLapTime, double distFromStart, double speedX, double speedY, double[] edgeSensors, double trackPosition) {
+        this(angle, curLapTime, distFromStart, speedX, speedY, edgeSensors, trackPosition, -1);
     }
 
     /*
