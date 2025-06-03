@@ -65,13 +65,14 @@ public class NearestNeighbor {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
+
+            // Salta la prima riga (intestazione con i nomi delle colonne)
+            reader.readLine();
+
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith(firstLineOfTheFile)) {
-                    continue; // Skip header
-                }
-                // Add the sample by calling the constructor that takes the string input
                 trainingData.add(new Sample(line));
             }
+
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
