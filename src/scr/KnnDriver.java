@@ -248,7 +248,11 @@ public class KnnDriver extends Controller {
         // Preparo il Sample
         Sample sample = new Sample(
                 sensors.getAngleToTrackAxis(),
+                sensors.getCurrentLapTime(),
+                sensors.getDistanceRaced(),
+                sensors.getDistanceFromStartLine(),
                 sensors.getSpeed(),
+                sensors.getLateralSpeed(),
                 sensors.getTrackEdgeSensors(),
                 sensors.getTrackPosition()
         );
