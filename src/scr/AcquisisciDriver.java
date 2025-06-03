@@ -59,8 +59,8 @@ public class AcquisisciDriver extends Controller {
     public AcquisisciDriver() {
         SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
         try {
-            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data%2f.csv")));
-            csvWriter.append("angle;curLapTime;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data%4f.csv")));
+            csvWriter.append("angle;curLapTime;damage;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -349,16 +349,17 @@ public class AcquisisciDriver extends Controller {
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
 
-        csvWriter.format("%.2f;", sensors.getAngleToTrackAxis());
-        csvWriter.format("%.2f;", sensors.getCurrentLapTime());
-        csvWriter.format("%.2f;", sensors.getDistanceRaced());
-        csvWriter.format("%.2f;", sensors.getDistanceFromStartLine());
-        csvWriter.format("%.2f;", sensors.getSpeed());
-        csvWriter.format("%.2f;", sensors.getLateralSpeed());
+        csvWriter.format("%.4f;", sensors.getAngleToTrackAxis());
+        csvWriter.format("%.4f;", sensors.getCurrentLapTime());
+        csvWriter.format("%.4f;", sensors.getDamage());
+        csvWriter.format("%.4f;", sensors.getDistanceRaced());
+        csvWriter.format("%.4f;", sensors.getDistanceFromStartLine());
+        csvWriter.format("%.4f;", sensors.getSpeed());
+        csvWriter.format("%.4f;", sensors.getLateralSpeed());
         for (double edgeSensor : sensors.getTrackEdgeSensors()) {
-            csvWriter.format("%.2f;", edgeSensor);
+            csvWriter.format("%.4f;", edgeSensor);
         }
-        csvWriter.format("%.2f;", sensors.getTrackPosition());
+        csvWriter.format("%.4f;", sensors.getTrackPosition());
         csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight, steerLilLeft, steerLilRight));
 
         csvWriter.println("");
