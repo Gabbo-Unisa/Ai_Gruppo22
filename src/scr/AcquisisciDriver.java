@@ -6,7 +6,7 @@ import java.sql.Struct;
 import java.util.Locale;
 
 public class AcquisisciDriver extends Controller {
-    private PrintWriter csvWriter;// Devo provare a tornare ad usare FileWriter
+    private PrintWriter csvWriter;
 
     /* Controlli dell'utente */
     private boolean accel;

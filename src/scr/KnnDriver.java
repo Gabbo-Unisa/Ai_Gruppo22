@@ -1,12 +1,14 @@
 package scr;
 
-import javax.swing.*;
-import java.io.*;
-import java.sql.Struct;
-import java.util.Locale;
+import knn.NearestNeighbor;
+import knn.Sample;
 
 public class KnnDriver extends Controller {
-    private PrintWriter csvWriter;// Devo provare a tornare ad usare FileWriter
+    private NearestNeighbor knn;
+
+    public KnnDriver() {
+        this.knn = new NearestNeighbor("driving_data.csv");
+    }
 
     /* Controlli dell'utente */
     private boolean accel;
@@ -64,7 +66,6 @@ public class KnnDriver extends Controller {
 
     public void shutdown() {
         System.out.println("Bye bye!");
-        csvWriter.close();
     }
 
     private int getGear(SensorModel sensors) {
@@ -240,147 +241,115 @@ public class KnnDriver extends Controller {
         return angles;
     }
 
-    public int determinaClasse(boolean accel, boolean brake, boolean steerLeft, boolean steerRight,
-                               boolean steerLilLeft, boolean steerLilRight) {
-        boolean steering = steerLeft || steerRight || steerLilLeft || steerLilRight;
-
-        if (!brake) {   // diamo priorità alla frenata
-            if (accel) {
-                if (!steering) {
-                    return 0;   // accelerazione, nessuna sterzata
-                } else if (steerLeft) {
-                    return 1;   // accelerazione, con sterzata sx
-                } else if (steerRight) {
-                    return 2;   // accelerazione, con sterzata dx
-                }
-
-                // Piccole sterzate con acceleratore
-                else if (steerLilLeft) {
-                    return 9;   // accelerazione, con piccola sterzata sx
-                } else if (steerLilRight) {
-                    return 10;  // accelerazione, con piccola sterzata dx
-                }
-
-
-            } else if (!steering) {
-                return 3;   // nessun comando
-            } else if (steerLeft) {
-                return 4;   // solo sterzata sx
-            } else if (steerRight) {
-                return 5;   // solo sterzata dx
-            }
-
-            // Piccole sterzate senza acceleratore
-            else if (steerLilLeft) {
-                return 11;  // solo piccola sterzata sx
-            } else if (steerLilRight) {
-                return 12;  // solo piccola sterzata dx
-            }
-
-
-        } else if (!steering) {
-            return 6;   // frenata, nessuna sterzata
-        } else if (steerLeft) {
-            return 7;   // frenata, con sterzata sx
-        } else if (steerRight) {
-            return 8;   // frenata, con sterzata dx
-        }
-
-        return -1;  // comando sconosciuto
-    }
 
     public Action control(SensorModel sensors) {
-        // Creazione di un nuovo oggetto Action
-        Action action = new Action();
+        Action knnAction = new Action();
 
-        // Calcolo della marcia
-        int gear = getGear(sensors);
+        // Preparo il Sample
+        Sample sample = new Sample(
+                sensors.getAngleToTrackAxis(),
+                sensors.getSpeed(),
+                sensors.getTrackEdgeSensors(),
+                sensors.getTrackPosition()
+        );
 
-        // Calcolo dello sterzo
+        // Normalizzo il Sample
+        double[] features = sample.getFeatures();
+        for (int i = 0; i < features.length; i++) {
+            features[i] = (features[i] - knn.getFeatureMin()[i]) / (knn.getFeatureMax()[i] - knn.getFeatureMin()[i]);
+        }
+
+        // Classifico il Sample
+        int predictClass = knn.classify(sample, 3);
+
+        double accel = 0;
+        double brake = 0;
         double steering = 0;
-        if (steerRight) {
-            steering = -0.25;
-        } else if (steerLeft) {
-            steering = 0.25;
-        } else if (steerLilRight) {
-            steering = -0.1;
-        } else if (steerLilLeft) {
-            steering = 0.1;
+
+        switch (predictClass) {
+            case 0:
+                steering = 0;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 1:
+                steering = -0.25;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 2:
+                steering = 0.25;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 3:
+                steering = 0.0;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 4:
+                steering = -0.25;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 5:
+                steering = 0.25;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 6:
+                steering = 0.0;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            case 7:
+                steering = -0.25;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            case 8:
+                steering = 0.25;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            case 9:
+                steering = -0.1;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 10:
+                steering = 0.1;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 11:
+                steering = -0.1;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 12:
+                steering = 0.1;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            default:
+                System.err.println("Classe sconosciuta: " + predictClass);
+                steering = 0.0;
+                accel = 0.0;
+                brake = 0.0;
+                break;
         }
 
-        // Calcolo dell'accelerazione e frenata
-        double accelerate = 0;
-        double brk = 0;
-
-        if (accel) {
-            accelerate = 0.95;
-        }
-
-        if (brake) {
-            if (sensors.getSpeed() < 1) {
-                // se sono fermo, vado in retromarcia
-                gear = -1;
-                accelerate = 0.8;
-            } else {
-                // se sono in corsa, freno
-                brk = 1.0;
-            }
-        }
-
-        // Calcolo della frizione
         clutch = clutching(sensors, clutch);
 
-        // Costruire una variabile CarControl
-        action.accelerate = accelerate;
-        action.brake = filterABS(sensors, (float) brk);
-        action.steering = steering;
-        action.clutch = clutch;
-        action.gear = gear;
+        knnAction.accelerate = accel;
+        knnAction.brake = brake;
+        knnAction.steering = steering;
+        knnAction.clutch = clutch;
+        knnAction.gear = getGear(sensors);
 
-        // Scrivo i sensori e le azioni del giocatore su un file CSV
 
-        csvWriter.format("%.4f;", sensors.getAngleToTrackAxis());
-        csvWriter.format("%.4f;", sensors.getCurrentLapTime());
-        csvWriter.format("%.4f;", sensors.getDamage());
-        csvWriter.format("%.4f;", sensors.getDistanceRaced());
-        csvWriter.format("%.4f;", sensors.getDistanceFromStartLine());
-        csvWriter.format("%.4f;", sensors.getSpeed());
-        csvWriter.format("%.4f;", sensors.getLateralSpeed());
-        for (double edgeSensor : sensors.getTrackEdgeSensors()) {
-            csvWriter.format("%.4f;", edgeSensor);
-        }
-        csvWriter.format("%.4f;", sensors.getTrackPosition());
-        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight, steerLilLeft, steerLilRight));
-
-        csvWriter.println("");
-
-        csvWriter.flush();
-
-        // Restituzione dell'azione calcolata
-        return action;
+        return knnAction;
     }
 
-    public void setAccel(boolean accel) {
-        this.accel = accel;
-    }
-
-    public void setBrake(boolean brake) {
-        this.brake = brake;
-    }
-
-    public void setSteerLeft(boolean steerLeft) {
-        this.steerLeft = steerLeft;
-    }
-
-    public void setSteerRight(boolean steerRight) {
-        this.steerRight = steerRight;
-    }
-
-    public void setSteerLilLeft(boolean steerLilLeft) {
-        this.steerLilLeft = steerLilLeft;
-    }
-
-    public void setSteerLilRight(boolean steerLilRight) {
-        this.steerLilRight = steerLilRight;
-    }
 }
