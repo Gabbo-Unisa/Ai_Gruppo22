@@ -74,6 +74,7 @@ public class Sample {
         Costruttore 4: specifico per TORCS con tutte le informazioni: angolo, velocità, sensori
                        e posizione sulla pista, più la classe. 
                        Usato per creare campioni etichettati (fase di training).
+                       prova
     */
     public Sample(double angle, double curLapTime, double distRaced, double distFromStart, double speedX, double speedY, double[] edgeSensors, double trackPosition, int cls) {
         this.features = new double[edgeSensors.length + 7];
