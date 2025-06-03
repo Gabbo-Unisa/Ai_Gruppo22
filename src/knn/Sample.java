@@ -29,7 +29,7 @@ public class Sample {
         Assume che l'ultimo valore nel CSV sia l'etichetta della classe.
     */
     public Sample(String line) {
-        String[] parts = line.split(",");
+        String[] parts = line.split(";");
         int n = parts.length;
         features = new double[n - 1];
         for (int i = 0; i < n - 1; i++) {
