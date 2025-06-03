@@ -3,11 +3,25 @@ package scr;
 import knn.NearestNeighbor;
 import knn.Sample;
 
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
 public class KnnDriver extends Controller {
     private NearestNeighbor knn;
+    private PrintWriter csvWriter;
+
 
     public KnnDriver() {
         this.knn = new NearestNeighbor("driving_data.csv");
+        try {
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("KnnDrivingData.csv")));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        csvWriter.append("angle;curLapTime;damage;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
+
     }
 
     /* Controlli dell'utente */
@@ -66,6 +80,7 @@ public class KnnDriver extends Controller {
 
     public void shutdown() {
         System.out.println("Bye bye!");
+        csvWriter.close();
     }
 
     private int getGear(SensorModel sensors) {
@@ -347,6 +362,23 @@ public class KnnDriver extends Controller {
         knnAction.steering = steering;
         knnAction.clutch = clutch;
         knnAction.gear = getGear(sensors);
+
+
+        csvWriter.format("%.4f;", sensors.getAngleToTrackAxis());
+        csvWriter.format("%.4f;", sensors.getCurrentLapTime());
+        csvWriter.format("%.4f;", sensors.getDamage());
+        csvWriter.format("%.4f;", sensors.getDistanceRaced());
+        csvWriter.format("%.4f;", sensors.getDistanceFromStartLine());
+        csvWriter.format("%.4f;", sensors.getSpeed());
+        csvWriter.format("%.4f;", sensors.getLateralSpeed());
+        for (double edgeSensor : sensors.getTrackEdgeSensors()) {
+            csvWriter.format("%.4f;", edgeSensor);
+        }
+        csvWriter.format("%.4f;", sensors.getTrackPosition());
+        csvWriter.print(predictClass);
+        csvWriter.println("");
+
+        csvWriter.flush();
 
 
         return knnAction;
