@@ -41,8 +41,10 @@ public class NearestNeighbor {
         //ricerca max e min per ogni feature
         for (Sample sample : trainingData) {
             for (int i = 0; i < featureLength; i++) {
-                if (sample.features[i] < featureMin[i]) featureMin[i] = sample.features[i];
-                if (sample.features[i] > featureMax[i]) featureMax[i] = sample.features[i];
+                if (sample.features[i] < featureMin[i])
+                    featureMin[i] = sample.features[i];
+                if (sample.features[i] > featureMax[i])
+                    featureMax[i] = sample.features[i];
             }
         }
 
@@ -53,6 +55,37 @@ public class NearestNeighbor {
         for (Sample sample : trainingData) {
             for (int i = 0; i < featureLength; i++) {
                 sample.features[i] = (sample.features[i] - featureMin[i]) / (featureMax[i] - featureMin[i]);
+            }
+        }
+    }
+
+    /*
+     * Metodo per normalizzare un singolo Sample (non nel trainingData)
+     * usando i min e max calcolati dal dataset di training.
+     */
+    public void normalizeSample(Sample sample) {
+        if (featureMin == null || featureMax == null || featureMin.length == 0) {
+            System.err.println("Errore: featureMin o featureMax non sono stati inizializzati o sono vuoti. Assicurati che i dati di training siano stati letti e normalizzati correttamente.");
+            // Potresti voler lanciare un'eccezione o gestire in altro modo
+            return;
+        }
+
+        double[] features = sample.getFeatures();
+        if (features.length != featureMin.length) {
+            System.err.println("Errore: il numero di feature del campione non corrisponde alla dimensione dei min/max calcolati. Sample features: " + features.length + ", Min/Max features: " + featureMin.length);
+            return; // O gestisci l'errore in modo appropriato
+        }
+
+        for (int i = 0; i < features.length; i++) {
+            double min = featureMin[i];
+            double max = featureMax[i];
+
+            if (max - min != 0) {
+                features[i] = (features[i] - min) / (max - min);
+            } else {
+                // Se la feature è costante nel training data, il valore normalizzato può essere 0.5 o 0.
+                // 0.5 è spesso preferito per non dare un bias eccessivo se non c'è varianza.
+                features[i] = 0.5;
             }
         }
     }

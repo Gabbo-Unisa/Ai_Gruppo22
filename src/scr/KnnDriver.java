@@ -272,13 +272,10 @@ public class KnnDriver extends Controller {
         );
 
         // Normalizzo il Sample
-        double[] features = sample.getFeatures();
-        for (int i = 0; i < features.length; i++) {
-            features[i] = (features[i] - knn.getFeatureMin()[i]) / (knn.getFeatureMax()[i] - knn.getFeatureMin()[i]);
-        }
+        knn.normalizeSample(sample);
 
         // Classifico il Sample
-        int predictClass = knn.classify(sample, 3);
+        int predictClass = knn.classify(sample, 5);
 
         double accel = 0;
         double brake = 0;
