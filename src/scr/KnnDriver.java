@@ -327,26 +327,6 @@ public class KnnDriver extends Controller {
                 accel = 0.0;
                 brake = 1.0;
                 break;
-            case 9:
-                steering = -0.1;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 10:
-                steering = 0.1;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 11:
-                steering = -0.1;
-                accel = 0.0;
-                brake = 0.0;
-                break;
-            case 12:
-                steering = 0.1;
-                accel = 0.0;
-                brake = 0.0;
-                break;
             default:
                 System.err.println("Classe sconosciuta: " + predictClass);
                 steering = 0.0;
@@ -355,26 +335,27 @@ public class KnnDriver extends Controller {
                 break;
         }
 
+        int gear = getGear(sensors);
         clutch = clutching(sensors, clutch);
 
         knnAction.accelerate = accel;
-        knnAction.brake = brake;
+        knnAction.brake = filterABS(sensors, (float) brake);
         knnAction.steering = steering;
         knnAction.clutch = clutch;
-        knnAction.gear = getGear(sensors);
+        knnAction.gear = gear;
 
 
-        csvWriter.format("%.4f;", sensors.getAngleToTrackAxis());
-        csvWriter.format("%.4f;", sensors.getCurrentLapTime());
-        csvWriter.format("%.4f;", sensors.getDamage());
-        csvWriter.format("%.4f;", sensors.getDistanceRaced());
-        csvWriter.format("%.4f;", sensors.getDistanceFromStartLine());
-        csvWriter.format("%.4f;", sensors.getSpeed());
-        csvWriter.format("%.4f;", sensors.getLateralSpeed());
+        csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
+        csvWriter.format("%.6f;", sensors.getCurrentLapTime());
+        csvWriter.format("%.6f;", sensors.getDamage());
+        csvWriter.format("%.6f;", sensors.getDistanceRaced());
+        csvWriter.format("%.6f;", sensors.getDistanceFromStartLine());
+        csvWriter.format("%.6f;", sensors.getSpeed());
+        csvWriter.format("%.6f;", sensors.getLateralSpeed());
         for (double edgeSensor : sensors.getTrackEdgeSensors()) {
-            csvWriter.format("%.4f;", edgeSensor);
+            csvWriter.format("%.6f;", edgeSensor);
         }
-        csvWriter.format("%.4f;", sensors.getTrackPosition());
+        csvWriter.format("%.6f;", sensors.getTrackPosition());
         csvWriter.print(predictClass);
         csvWriter.println("");
 

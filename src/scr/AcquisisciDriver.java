@@ -13,8 +13,6 @@ public class AcquisisciDriver extends Controller {
     private boolean brake;
     private boolean steerLeft;
     private boolean steerRight;
-    private boolean steerLilLeft;
-    private boolean steerLilRight;
 
     /* Costanti di cambio marcia */
     final int[] gearUp = { 16000, 18000, 18000, 18000, 18000, 18000, 0 };
@@ -59,7 +57,7 @@ public class AcquisisciDriver extends Controller {
     public AcquisisciDriver() {
         SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
         try {
-            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("incidente curva 1-1.csv")));
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data_primi3giri.csv")));
             csvWriter.append("angle;curLapTime;damage;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -250,9 +248,8 @@ public class AcquisisciDriver extends Controller {
         return angles;
     }
 
-    public int determinaClasse(boolean accel, boolean brake, boolean steerLeft, boolean steerRight,
-                               boolean steerLilLeft, boolean steerLilRight) {
-        boolean steering = steerLeft || steerRight || steerLilLeft || steerLilRight;
+    public int determinaClasse(boolean accel, boolean brake, boolean steerLeft, boolean steerRight) {
+        boolean steering = steerLeft || steerRight;
 
         if (!brake) {   // diamo priorità alla frenata
             if (accel) {
@@ -263,15 +260,6 @@ public class AcquisisciDriver extends Controller {
                 } else if (steerRight) {
                     return 2;   // accelerazione, con sterzata dx
                 }
-
-                // Piccole sterzate con acceleratore
-                else if (steerLilLeft) {
-                    return 9;   // accelerazione, con piccola sterzata sx
-                } else if (steerLilRight) {
-                    return 10;  // accelerazione, con piccola sterzata dx
-                }
-
-
             } else if (!steering) {
                 return 3;   // nessun comando
             } else if (steerLeft) {
@@ -279,15 +267,6 @@ public class AcquisisciDriver extends Controller {
             } else if (steerRight) {
                 return 5;   // solo sterzata dx
             }
-
-            // Piccole sterzate senza acceleratore
-            else if (steerLilLeft) {
-                return 11;  // solo piccola sterzata sx
-            } else if (steerLilRight) {
-                return 12;  // solo piccola sterzata dx
-            }
-
-
         } else if (!steering) {
             return 6;   // frenata, nessuna sterzata
         } else if (steerLeft) {
@@ -309,13 +288,9 @@ public class AcquisisciDriver extends Controller {
         // Calcolo dello sterzo
         double steering = 0;
         if (steerRight) {
-            steering = -0.25;
+            steering = 0.2;
         } else if (steerLeft) {
-            steering = 0.25;
-        } else if (steerLilRight) {
-            steering = -0.1;
-        } else if (steerLilLeft) {
-            steering = 0.1;
+            steering = -0.2;
         }
 
         // Calcolo dell'accelerazione e frenata
@@ -349,18 +324,18 @@ public class AcquisisciDriver extends Controller {
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
 
-        csvWriter.format("%.4f;", sensors.getAngleToTrackAxis());
-        csvWriter.format("%.4f;", sensors.getCurrentLapTime());
-        csvWriter.format("%.4f;", sensors.getDamage());
-        csvWriter.format("%.4f;", sensors.getDistanceRaced());
-        csvWriter.format("%.4f;", sensors.getDistanceFromStartLine());
-        csvWriter.format("%.4f;", sensors.getSpeed());
-        csvWriter.format("%.4f;", sensors.getLateralSpeed());
+        csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
+        csvWriter.format("%.6f;", sensors.getCurrentLapTime());
+        csvWriter.format("%.6f;", sensors.getDamage());
+        csvWriter.format("%.6f;", sensors.getDistanceRaced());
+        csvWriter.format("%.6f;", sensors.getDistanceFromStartLine());
+        csvWriter.format("%.6f;", sensors.getSpeed());
+        csvWriter.format("%.6f;", sensors.getLateralSpeed());
         for (double edgeSensor : sensors.getTrackEdgeSensors()) {
-            csvWriter.format("%.4f;", edgeSensor);
+            csvWriter.format("%.6f;", edgeSensor);
         }
-        csvWriter.format("%.4f;", sensors.getTrackPosition());
-        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight, steerLilLeft, steerLilRight));
+        csvWriter.format("%.6f;", sensors.getTrackPosition());
+        csvWriter.print(determinaClasse(accel, brake, steerLeft, steerRight));
 
         csvWriter.println("");
 
@@ -386,11 +361,4 @@ public class AcquisisciDriver extends Controller {
         this.steerRight = steerRight;
     }
 
-    public void setSteerLilLeft(boolean steerLilLeft) {
-        this.steerLilLeft = steerLilLeft;
-    }
-
-    public void setSteerLilRight(boolean steerLilRight) {
-        this.steerLilRight = steerLilRight;
-    }
 }
