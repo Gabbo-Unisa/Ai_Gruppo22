@@ -323,7 +323,6 @@ public class AcquisisciDriver extends Controller {
         action.gear = gear;
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
-
         csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
         csvWriter.format("%.6f;", sensors.getCurrentLapTime());
         csvWriter.format("%.6f;", sensors.getDamage());

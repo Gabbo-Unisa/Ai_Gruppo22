@@ -335,16 +335,39 @@ public class KnnDriver extends Controller {
                 break;
         }
 
+        // Calcolo della marcia
         int gear = getGear(sensors);
+
+        // Gestione frenata e retromarcia
+        if (brake > 0) {
+            if (sensors.getSpeed() < 1) {
+                // Se sono fermo, imposta la retromarcia
+                if (gear > 0) {
+                    gear = -1;
+                    accel = 0.5;
+                    brake = 0.0;
+                }
+            } else {
+                brake = Math.min(1.0, sensors.getSpeed() / 100.0);
+            }
+        }
+
+        // Ritorno alla prima marcia se sto accelerando in avanti in retromarcia
+        if (gear == -1 && sensors.getSpeed() > 5) {
+            gear = 1;
+        }
+
+        // Calcolo della frizione
         clutch = clutching(sensors, clutch);
 
+        // Costruire una variabile CarControl
         knnAction.accelerate = accel;
         knnAction.brake = filterABS(sensors, (float) brake);
         knnAction.steering = steering;
         knnAction.clutch = clutch;
         knnAction.gear = gear;
 
-
+        // Scrivo i sensori e le azioni del giocatore su un file CSV
         csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
         csvWriter.format("%.6f;", sensors.getCurrentLapTime());
         csvWriter.format("%.6f;", sensors.getDamage());
