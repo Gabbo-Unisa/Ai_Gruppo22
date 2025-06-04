@@ -282,48 +282,48 @@ public class KnnDriver extends Controller {
         double steering = 0;
 
         switch (predictClass) {
-            case 0:
+            case 0:     // accelerazione, nessuna sterzata
                 steering = 0;
                 accel = 0.95;
                 brake = 0.0;
                 break;
-            case 1:
-                steering = -0.25;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 2:
+            case 1:     // accelerazione, con sterzata sx
                 steering = 0.25;
                 accel = 0.95;
                 brake = 0.0;
                 break;
-            case 3:
+            case 2:     // accelerazione, con sterzata dx
+                steering = -0.25;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 3:     // nessun comando
                 steering = 0.0;
                 accel = 0.0;
                 brake = 0.0;
                 break;
-            case 4:
-                steering = -0.25;
-                accel = 0.0;
-                brake = 0.0;
-                break;
-            case 5:
+            case 4:     // solo sterzata sx
                 steering = 0.25;
                 accel = 0.0;
                 brake = 0.0;
                 break;
-            case 6:
+            case 5:     // solo sterzata dx
+                steering = -0.25;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 6:     // frenata, nessuna sterzata
                 steering = 0.0;
                 accel = 0.0;
                 brake = 1.0;
                 break;
-            case 7:
-                steering = -0.25;
+            case 7:     // frenata, con sterzata sx
+                steering = 0.25;
                 accel = 0.0;
                 brake = 1.0;
                 break;
-            case 8:
-                steering = 0.25;
+            case 8:     // frenata, con sterzata dx
+                steering = -0.25;
                 accel = 0.0;
                 brake = 1.0;
                 break;
