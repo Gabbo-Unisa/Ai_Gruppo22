@@ -33,8 +33,8 @@ public class KnnDriver extends Controller {
     private boolean steerLilRight;
 
     /* Costanti di cambio marcia */
-    final int[] gearUp = { 16000, 18000, 18000, 18000, 18000, 18000, 0 };
-    final int[] gearDown = { 0, 9000, 9000, 12000, 12000, 12000, 12000 };
+    final int[] gearUp = { 16000, 18500, 18500, 18500, 18500, 18500, 0 };
+    final int[] gearDown = { 0, 9000, 10000, 12000, 12000, 12000, 12000 };
 
     /* Costanti */
     final int stuckTime = 25;
@@ -275,7 +275,7 @@ public class KnnDriver extends Controller {
         knn.normalizeSample(sample);
 
         // Classifico il Sample
-        int predictClass = knn.classify(sample, 5);
+        int predictClass = knn.classify(sample, 3);
 
         double accel = 0;
         double brake = 0;
