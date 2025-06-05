@@ -14,9 +14,9 @@ public class KnnDriver extends Controller {
 
 
     public KnnDriver() {
-        this.knn = new NearestNeighbor("driving_data.csv");
+        this.knn = new NearestNeighbor("driving_data_155.csv");
         try {
-            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("KnnDrivingData.csv")));
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("KnnDrivingData_155.csv")));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -33,8 +33,8 @@ public class KnnDriver extends Controller {
     private boolean steerLilRight;
 
     /* Costanti di cambio marcia */
-    final int[] gearUp = { 11000, 14000, 18000, 18000, 18000, 18000, 0 };
-    final int[] gearDown = { 0, 5000, 5000, 12000, 12000, 12000, 12000 };
+    final int[] gearUp = { 7000, 7500, 7500, 7500, 7500, 0 };
+    final int[] gearDown = { 0, 4000, 4000, 4000, 4000, 4000 };
 
     /* Costanti */
     final int stuckTime = 25;
@@ -93,7 +93,7 @@ public class KnnDriver extends Controller {
 
         // Se il valore di RPM dell'auto è maggiore di quello suggerito
         // sale di marcia rispetto a quella attuale
-        if (gear < 7 && rpm >= gearUp[gear - 1])
+        if (gear < 6 && rpm >= gearUp[gear - 1])
             return gear + 1;
         else
 
