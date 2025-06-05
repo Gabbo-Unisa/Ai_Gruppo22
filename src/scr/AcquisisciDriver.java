@@ -15,8 +15,8 @@ public class AcquisisciDriver extends Controller {
     private boolean steerRight;
 
     /* Costanti di cambio marcia */
-    final int[] gearUp = { 11000, 14000, 18000, 18000, 18000, 18000, 0 };
-    final int[] gearDown = { 0, 5000, 5000, 12000, 12000, 12000, 12000 };
+    final int[] gearUp = { 7000, 7500, 7500, 7500, 7500, 0 };
+    final int[] gearDown = { 0, 4000, 4000, 4000, 4000, 4000 };
 
     /* Costanti */
     final int stuckTime = 25;
@@ -85,7 +85,7 @@ public class AcquisisciDriver extends Controller {
 
         // Se il valore di RPM dell'auto è maggiore di quello suggerito
         // sale di marcia rispetto a quella attuale
-        if (gear < 7 && rpm >= gearUp[gear - 1])
+        if (gear < 6 && rpm >= gearUp[gear - 1])
             return gear + 1;
         else
 
