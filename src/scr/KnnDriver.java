@@ -385,20 +385,6 @@ public class KnnDriver extends Controller {
             // Calcolo della marcia
             int gear = getGear(sensors);
 
-            // Gestione frenata e retromarcia
-            if (brake > 0) {
-                if (sensors.getSpeed() < 1) {
-                    // Se sono fermo, imposta la retromarcia
-                    if (gear > 0) {
-                        gear = -1;
-                        accel = 0.5;
-                        brake = 0.0;
-                    }
-                } else {
-                    brake = Math.min(1.0, sensors.getSpeed() / 100.0);
-                }
-            }
-
             // Ritorno alla prima marcia se sto accelerando in avanti in retromarcia
             if (gear == -1 && sensors.getSpeed() > 5) {
                 gear = 1;
