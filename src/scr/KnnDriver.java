@@ -385,11 +385,6 @@ public class KnnDriver extends Controller {
             // Calcolo della marcia
             int gear = getGear(sensors);
 
-            // Ritorno alla prima marcia se sto accelerando in avanti in retromarcia
-            if (gear == -1 && sensors.getSpeed() > 5) {
-                gear = 1;
-            }
-
             // Calcolo della frizione
             clutch = clutching(sensors, clutch);
 
