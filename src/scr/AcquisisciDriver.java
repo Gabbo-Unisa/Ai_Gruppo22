@@ -288,9 +288,9 @@ public class AcquisisciDriver extends Controller {
         // Calcolo dello sterzo
         double steering = 0;
         if (steerRight) {
-            steering = -0.2;
+            steering = -0.15;
         } else if (steerLeft) {
-            steering = 0.2;
+            steering = 0.15;
         }
 
         // Calcolo dell'accelerazione e frenata
@@ -308,7 +308,7 @@ public class AcquisisciDriver extends Controller {
                 accelerate = 0.8;
             } else {
                 // se sono in corsa, freno
-                brk = 0.3;
+                brk = 0.8;
             }
         }
 

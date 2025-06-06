@@ -302,7 +302,7 @@ public class KnnDriver extends Controller {
             // Costruire una variabile CarControl e restituirla
             knnAction.gear = gear;
             knnAction.steering = steer;
-            knnAction.accelerate = 1.0;
+            knnAction.accelerate = 0.2; // Accelerazione moderata per evitare di perdere il controllo
             knnAction.brake = 0;
             knnAction.clutch = clutch;
             return knnAction;
@@ -335,12 +335,12 @@ public class KnnDriver extends Controller {
                     brake = 0.0;
                     break;
                 case 1:     // accelerazione, con sterzata sx
-                    steering = 0.2;
+                    steering = 0.15;
                     accel = 0.95;
                     brake = 0.0;
                     break;
                 case 2:     // accelerazione, con sterzata dx
-                    steering = -0.2;
+                    steering = -0.15;
                     accel = 0.95;
                     brake = 0.0;
                     break;
@@ -350,29 +350,29 @@ public class KnnDriver extends Controller {
                     brake = 0.0;
                     break;
                 case 4:     // solo sterzata sx
-                    steering = 0.2;
+                    steering = 0.15;
                     accel = 0.0;
                     brake = 0.0;
                     break;
                 case 5:     // solo sterzata dx
-                    steering = -0.2;
+                    steering = -0.15;
                     accel = 0.0;
                     brake = 0.0;
                     break;
                 case 6:     // frenata, nessuna sterzata
                     steering = 0.0;
                     accel = 0.0;
-                    brake = 1.0;
+                    brake = 0.8;
                     break;
                 case 7:     // frenata, con sterzata sx
-                    steering = 0.2;
+                    steering = 0.15;
                     accel = 0.0;
-                    brake = 1.0;
+                    brake = 0.8;
                     break;
                 case 8:     // frenata, con sterzata dx
-                    steering = -0.2;
+                    steering = -0.15;
                     accel = 0.0;
-                    brake = 1.0;
+                    brake = 0.8;
                     break;
                 default:
                     System.err.println("Classe sconosciuta: " + predictClass);
