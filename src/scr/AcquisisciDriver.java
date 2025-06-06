@@ -57,7 +57,7 @@ public class AcquisisciDriver extends Controller {
     public AcquisisciDriver() {
         SwingUtilities.invokeLater(() -> new ContinuousCharReaderUI(this));
         try {
-            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("driving_data_ctc_parabolica1.csv")));
+            csvWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream("155_DTM_8-12giri.csv")));
             csvWriter.append("angle;curLapTime;damage;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
         } catch (IOException e) {
             e.printStackTrace();

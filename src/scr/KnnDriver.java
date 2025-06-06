@@ -241,7 +241,7 @@ public class KnnDriver extends Controller {
 
         /*
          * set angles as
-         * {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90}
+         * {-90(0),-75(1),-60(2),-45(3),-30(4),-20(5),-15(6),-10(7),-5(8),0(9),5(10),10(11),15(12),20(13),30(14),45(15),60(16),75(17),90(18)}
          */
         for (int i = 0; i < 5; i++) {
             angles[i] = -90 + i * 15;
@@ -259,113 +259,160 @@ public class KnnDriver extends Controller {
 
     public Action control(SensorModel sensors) {
         Action knnAction = new Action();
+        int predictClass = -1;
 
-        // Preparo il Sample
-        Sample sample = new Sample(
-                sensors.getAngleToTrackAxis(),
-                sensors.getCurrentLapTime(),
-                sensors.getDistanceFromStartLine(),
-                sensors.getSpeed(),
-                sensors.getLateralSpeed(),
-                sensors.getTrackEdgeSensors(),
-                sensors.getTrackPosition()
-        );
-
-        // Normalizzo il Sample
-        knn.normalizeSample(sample);
-
-        // Classifico il Sample
-        int predictClass = knn.classify(sample, 5);
-
-        double accel = 0;
-        double brake = 0;
-        double steering = 0;
-
-        switch (predictClass) {
-            case 0:     // accelerazione, nessuna sterzata
-                steering = 0;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 1:     // accelerazione, con sterzata sx
-                steering = 0.3;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 2:     // accelerazione, con sterzata dx
-                steering = -0.3;
-                accel = 0.95;
-                brake = 0.0;
-                break;
-            case 3:     // nessun comando
-                steering = 0.0;
-                accel = 0.0;
-                brake = 0.0;
-                break;
-            case 4:     // solo sterzata sx
-                steering = 0.3;
-                accel = 0.0;
-                brake = 0.0;
-                break;
-            case 5:     // solo sterzata dx
-                steering = -0.3;
-                accel = 0.0;
-                brake = 0.0;
-                break;
-            case 6:     // frenata, nessuna sterzata
-                steering = 0.0;
-                accel = 0.0;
-                brake = 1.0;
-                break;
-            case 7:     // frenata, con sterzata sx
-                steering = 0.3;
-                accel = 0.0;
-                brake = 1.0;
-                break;
-            case 8:     // frenata, con sterzata dx
-                steering = -0.3;
-                accel = 0.0;
-                brake = 1.0;
-                break;
-            default:
-                System.err.println("Classe sconosciuta: " + predictClass);
-                steering = 0.0;
-                accel = 0.0;
-                brake = 0.0;
-                break;
+        // Controlla se l'auto è attualmente bloccata
+        /**
+         Se l'auto ha un angolo, rispetto alla traccia, superiore a 30°
+         incrementa "stuck" che è una variabile che indica per quanti cicli l'auto è in
+         condizione di difficoltà.
+         Quando l'angolo si riduce, "stuck" viene riportata a 0 per indicare che l'auto è
+         uscita dalla situaizone di difficoltà
+         **/
+        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle) {
+            // update stuck counter
+            stuck++;
+        } else {
+            // if not stuck reset stuck counter
+            stuck = 0;
         }
 
-        // Calcolo della marcia
-        int gear = getGear(sensors);
+        // Applicare la polizza di recupero o meno in base al tempo trascorso
+        /**
+         Se "stuck" è superiore a 25 (stuckTime) allora procedi a entrare in situaizone di RECOVERY
+         per far fronte alla situazione di difficoltà
+         **/
 
-        // Gestione frenata e retromarcia
-        if (brake > 0) {
-            if (sensors.getSpeed() < 1) {
-                // Se sono fermo, imposta la retromarcia
-                if (gear > 0) {
-                    gear = -1;
-                    accel = 0.5;
-                    brake = 0.0;
-                }
-            } else {
-                brake = Math.min(1.0, sensors.getSpeed() / 100.0);
+        if (stuck > stuckTime) { //Auto Bloccata
+            /**
+             * Impostare la marcia e il comando di sterzata supponendo che l'auto stia puntando
+             * in una direzione al di fuori di pista
+             **/
+
+            // Per portare la macchina parallela all'asse TrackPos
+            float steer = (float) (-sensors.getAngleToTrackAxis() / steerLock);
+            int gear = -1; // Retromarcia
+
+            // Se l'auto è orientata nella direzione corretta invertire la marcia e sterzare
+            if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
+                gear = 1;
+                steer = -steer;
             }
+            clutch = clutching(sensors, clutch);
+            // Costruire una variabile CarControl e restituirla
+            knnAction.gear = gear;
+            knnAction.steering = steer;
+            knnAction.accelerate = 1.0;
+            knnAction.brake = 0;
+            knnAction.clutch = clutch;
+            return knnAction;
+
+        } else {    //Auto non Bloccata
+
+            // Preparo il Sample
+            Sample sample = new Sample(
+                    sensors.getAngleToTrackAxis(),
+                    sensors.getSpeed(),
+                    sensors.getTrackEdgeSensors(),
+                    sensors.getTrackPosition()
+            );
+
+            // Normalizzo il Sample
+            knn.normalizeSample(sample);
+
+            // Classifico il Sample
+            predictClass = knn.classify(sample, 5);
+
+            double accel = 0;
+            double brake = 0;
+            double steering = 0;
+
+            switch (predictClass) {
+                case 0:     // accelerazione, nessuna sterzata
+                    steering = 0;
+                    accel = 0.95;
+                    brake = 0.0;
+                    break;
+                case 1:     // accelerazione, con sterzata sx
+                    steering = 0.3;
+                    accel = 0.95;
+                    brake = 0.0;
+                    break;
+                case 2:     // accelerazione, con sterzata dx
+                    steering = -0.3;
+                    accel = 0.95;
+                    brake = 0.0;
+                    break;
+                case 3:     // nessun comando
+                    steering = 0.0;
+                    accel = 0.0;
+                    brake = 0.0;
+                    break;
+                case 4:     // solo sterzata sx
+                    steering = 0.3;
+                    accel = 0.0;
+                    brake = 0.0;
+                    break;
+                case 5:     // solo sterzata dx
+                    steering = -0.3;
+                    accel = 0.0;
+                    brake = 0.0;
+                    break;
+                case 6:     // frenata, nessuna sterzata
+                    steering = 0.0;
+                    accel = 0.0;
+                    brake = 1.0;
+                    break;
+                case 7:     // frenata, con sterzata sx
+                    steering = 0.3;
+                    accel = 0.0;
+                    brake = 1.0;
+                    break;
+                case 8:     // frenata, con sterzata dx
+                    steering = -0.3;
+                    accel = 0.0;
+                    brake = 1.0;
+                    break;
+                default:
+                    System.err.println("Classe sconosciuta: " + predictClass);
+                    steering = 0.0;
+                    accel = 0.0;
+                    brake = 0.0;
+                    break;
+            }
+
+            // Calcolo della marcia
+            int gear = getGear(sensors);
+
+            // Gestione frenata e retromarcia
+            if (brake > 0) {
+                if (sensors.getSpeed() < 1) {
+                    // Se sono fermo, imposta la retromarcia
+                    if (gear > 0) {
+                        gear = -1;
+                        accel = 0.5;
+                        brake = 0.0;
+                    }
+                } else {
+                    brake = Math.min(1.0, sensors.getSpeed() / 100.0);
+                }
+            }
+
+            // Ritorno alla prima marcia se sto accelerando in avanti in retromarcia
+            if (gear == -1 && sensors.getSpeed() > 5) {
+                gear = 1;
+            }
+
+            // Calcolo della frizione
+            clutch = clutching(sensors, clutch);
+
+            // Costruire una variabile CarControl
+            knnAction.accelerate = accel;
+            knnAction.brake = filterABS(sensors, (float) brake);
+            knnAction.steering = steering;
+            knnAction.clutch = clutch;
+            knnAction.gear = gear;
         }
-
-        // Ritorno alla prima marcia se sto accelerando in avanti in retromarcia
-        if (gear == -1 && sensors.getSpeed() > 5) {
-            gear = 1;
-        }
-
-        // Calcolo della frizione
-        clutch = clutching(sensors, clutch);
-
-        // Costruire una variabile CarControl
-        knnAction.accelerate = accel;
-        knnAction.brake = filterABS(sensors, (float) brake);
-        knnAction.steering = steering;
-        knnAction.clutch = clutch;
-        knnAction.gear = gear;
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
         csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
