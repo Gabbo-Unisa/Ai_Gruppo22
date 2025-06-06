@@ -66,11 +66,12 @@ public class Sample {
                        Usato per creare campioni etichettati (fase di training).
     */
     public Sample(double angle, double speedX, double[] edgeSensors, double trackPosition, int cls) {
-        this.features = new double[edgeSensors.length + 3];
+        // Scelgo i sensori track che voglio utilizzare
+        int[] selectedEdgeSensors = {2, 4, 6, 8, 9, 10, 12, 14, 16};    // -+60, -+30, -+15, -+5, 0
+
+        this.features = new double[selectedEdgeSensors.length + 3];
         this.features[0] = angle;
         this.features[1] = speedX;
-
-        int[] selectedEdgeSensors = {2, 4, 6, 8, 9, 10, 12, 14, 16};    // -+60, -+30, -+15, -+5, 0
 
         for (int i=0; i<selectedEdgeSensors.length; ++i) {
             this.features[i+2] = edgeSensors[selectedEdgeSensors[i]];
