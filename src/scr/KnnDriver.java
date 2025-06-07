@@ -20,7 +20,7 @@ public class KnnDriver extends Controller {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        csvWriter.append("angle;curLapTime;damage;distRaced;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
+        csvWriter.append("angle;curLapTime;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class\n");
 
     }
 
@@ -306,100 +306,98 @@ public class KnnDriver extends Controller {
             knnAction.brake = 0;
             knnAction.clutch = clutch;
             return knnAction;
-
-        } else {    //Auto non Bloccata
-
-            // Preparo il Sample
-            Sample sample = new Sample(
-                    sensors.getAngleToTrackAxis(),
-                    sensors.getSpeed(),
-                    sensors.getTrackEdgeSensors(),
-                    sensors.getTrackPosition()
-            );
-
-            // Normalizzo il Sample
-            knn.normalizeSample(sample);
-
-            // Classifico il Sample
-            predictClass = knn.classify(sample, 5);
-
-            double accel = 0;
-            double brake = 0;
-            double steering = 0;
-
-            switch (predictClass) {
-                case 0:     // accelerazione, nessuna sterzata
-                    steering = 0;
-                    accel = 0.95;
-                    brake = 0.0;
-                    break;
-                case 1:     // accelerazione, con sterzata sx
-                    steering = 0.3;
-                    accel = 0.95;
-                    brake = 0.0;
-                    break;
-                case 2:     // accelerazione, con sterzata dx
-                    steering = -0.3;
-                    accel = 0.95;
-                    brake = 0.0;
-                    break;
-                case 3:     // nessun comando
-                    steering = 0.0;
-                    accel = 0.0;
-                    brake = 0.0;
-                    break;
-                case 4:     // solo sterzata sx
-                    steering = 0.3;
-                    accel = 0.0;
-                    brake = 0.0;
-                    break;
-                case 5:     // solo sterzata dx
-                    steering = -0.3;
-                    accel = 0.0;
-                    brake = 0.0;
-                    break;
-                case 6:     // frenata, nessuna sterzata
-                    steering = 0.0;
-                    accel = 0.0;
-                    brake = 1.0;
-                    break;
-                case 7:     // frenata, con sterzata sx
-                    steering = 0.3;
-                    accel = 0.0;
-                    brake = 1.0;
-                    break;
-                case 8:     // frenata, con sterzata dx
-                    steering = -0.3;
-                    accel = 0.0;
-                    brake = 1.0;
-                    break;
-                default:
-                    System.err.println("Classe sconosciuta: " + predictClass);
-                    steering = 0.0;
-                    accel = 0.0;
-                    brake = 0.0;
-                    break;
-            }
-
-            // Calcolo della marcia
-            int gear = getGear(sensors);
-
-            // Calcolo della frizione
-            clutch = clutching(sensors, clutch);
-
-            // Costruire una variabile CarControl
-            knnAction.accelerate = accel;
-            knnAction.brake = filterABS(sensors, (float) brake);
-            knnAction.steering = steering;
-            knnAction.clutch = clutch;
-            knnAction.gear = gear;
         }
+
+        //Auto non Bloccata
+        // Preparo il Sample
+        Sample sample = new Sample(
+                sensors.getAngleToTrackAxis(),
+                sensors.getDistanceFromStartLine(),
+                sensors.getSpeed(),
+                sensors.getTrackEdgeSensors(),
+                sensors.getTrackPosition()
+        );
+
+        // Normalizzo il Sample
+        knn.normalizeSample(sample);
+        // Classifico il Sample
+        predictClass = knn.classify(sample, 3);
+
+        double accel = 0;
+        double brake = 0;
+        double steering = 0;
+
+        switch (predictClass) {
+            case 0:     // accelerazione, nessuna sterzata
+                steering = 0;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 1:     // accelerazione, con sterzata sx
+                steering = 0.3;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 2:     // accelerazione, con sterzata dx
+                steering = -0.3;
+                accel = 0.95;
+                brake = 0.0;
+                break;
+            case 3:     // nessun comando
+                steering = 0.0;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 4:     // solo sterzata sx
+                steering = 0.3;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 5:     // solo sterzata dx
+                steering = -0.3;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+            case 6:     // frenata, nessuna sterzata
+                steering = 0.0;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            case 7:     // frenata, con sterzata sx
+                steering = 0.3;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            case 8:     // frenata, con sterzata dx
+                steering = -0.3;
+                accel = 0.0;
+                brake = 1.0;
+                break;
+            default:
+                System.err.println("Classe sconosciuta: " + predictClass);
+                steering = 0.0;
+                accel = 0.0;
+                brake = 0.0;
+                break;
+        }
+
+        // Calcolo della marcia
+        int gear = getGear(sensors);
+
+        // Calcolo della frizione
+        clutch = clutching(sensors, clutch);
+
+        // Costruire una variabile CarControl
+        knnAction.accelerate = accel;
+        knnAction.brake = filterABS(sensors, (float) brake);
+        knnAction.steering = steering;
+        knnAction.clutch = clutch;
+        knnAction.gear = gear;
+
 
         // Scrivo i sensori e le azioni del giocatore su un file CSV
         csvWriter.format("%.6f;", sensors.getAngleToTrackAxis());
         csvWriter.format("%.6f;", sensors.getCurrentLapTime());
-        csvWriter.format("%.6f;", sensors.getDamage());
-        csvWriter.format("%.6f;", sensors.getDistanceRaced());
         csvWriter.format("%.6f;", sensors.getDistanceFromStartLine());
         csvWriter.format("%.6f;", sensors.getSpeed());
         csvWriter.format("%.6f;", sensors.getLateralSpeed());
@@ -415,5 +413,6 @@ public class KnnDriver extends Controller {
 
         return knnAction;
     }
+
 
 }

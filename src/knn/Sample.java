@@ -65,16 +65,17 @@ public class Sample {
                        e posizione sulla pista, più la classe. 
                        Usato per creare campioni etichettati (fase di training).
     */
-    public Sample(double angle, double speedX, double[] edgeSensors, double trackPosition, int cls) {
-        // Scelgo i sensori track che voglio utilizzare
+    public Sample(double angle, double distFromStart, double speedX, double[] edgeSensors, double trackPosition, int cls) {
+        // Scelgo i sensori track che voglio utilizzare {2, 4, 6, 8, 9, 10, 12, 14, 16}
         int[] selectedEdgeSensors = {2, 4, 6, 8, 9, 10, 12, 14, 16};    // -+60, -+30, -+15, -+5, 0
 
-        this.features = new double[selectedEdgeSensors.length + 3];
+        this.features = new double[selectedEdgeSensors.length + 4];
         this.features[0] = angle;
-        this.features[1] = speedX;
+        this.features[1] = distFromStart;
+        this.features[3] = speedX;
 
         for (int i=0; i<selectedEdgeSensors.length; ++i) {
-            this.features[i+2] = edgeSensors[selectedEdgeSensors[i]];
+            this.features[i+3] = edgeSensors[selectedEdgeSensors[i]];
         }
 
         this.features[features.length - 1] = trackPosition;
@@ -86,8 +87,8 @@ public class Sample {
                        NON richiede una classe, perché verrà predetta dal classificatore.
                        Imposta cls = -1 come valore di default.
     */
-    public Sample(double angle, double speedX, double[] edgeSensors, double trackPosition) {
-        this(angle, speedX, edgeSensors, trackPosition, -1);
+    public Sample(double angle, double distFromStart, double speedX, double[] edgeSensors, double trackPosition) {
+        this(angle, distFromStart, speedX, edgeSensors, trackPosition, -1);
     }
 
     /*
