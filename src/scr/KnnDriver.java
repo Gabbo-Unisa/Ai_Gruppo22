@@ -314,6 +314,7 @@ public class KnnDriver extends Controller {
             Sample sample = new Sample(
                     sensors.getAngleToTrackAxis(),
                     sensors.getSpeed(),
+                    sensors.getDistanceFromStartLine(),
                     sensors.getTrackEdgeSensors(),
                     sensors.getTrackPosition()
             );
@@ -322,7 +323,7 @@ public class KnnDriver extends Controller {
             knn.normalizeSample(sample);
 
             // Classifico il Sample
-            predictClass = knn.classify(sample, 5);
+            predictClass = knn.classify(sample, 3);
 
             double accel = 0;
             double brake = 0;

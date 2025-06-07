@@ -308,7 +308,7 @@ public class AcquisisciDriver extends Controller {
                 accelerate = 0.8;
             } else {
                 // se sono in corsa, freno
-                brk = 0.8;
+                brk = 0.4;
             }
         }
 
