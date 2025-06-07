@@ -9,10 +9,10 @@ public class AcquisisciDriver extends Controller {
     private PrintWriter csvWriter;
 
     /* Controlli dell'utente */
-    private boolean accel;
-    private boolean brake;
-    private boolean steerLeft;
-    private boolean steerRight;
+    private volatile boolean accel;
+    private volatile boolean brake;
+    private volatile boolean steerLeft;
+    private volatile boolean steerRight;
 
     /* Costanti di cambio marcia */
     final int[] gearUp = { 11000, 14000, 18000, 18000, 18000, 18000, 0 };
