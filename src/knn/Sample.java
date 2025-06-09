@@ -72,7 +72,7 @@ public class Sample {
         this.features = new double[selectedEdgeSensors.length + 4];
         this.features[0] = angle;
         this.features[1] = distFromStart;
-        this.features[3] = speedX;
+        this.features[2] = speedX;
 
         for (int i=0; i<selectedEdgeSensors.length; ++i) {
             this.features[i+3] = edgeSensors[selectedEdgeSensors[i]];
