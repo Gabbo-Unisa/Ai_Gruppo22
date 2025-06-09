@@ -27,7 +27,7 @@ public class NearestNeighbor {
         Metodo che legge i dati da un file csv e normalizza le feature dei campioni
         questo perchè avendo tutte le feature su scala simile (da 0 a 1) anche se una presenta
         valori molto grandi non influenza particolarmente la distanza.
-     */
+    */
     private void normalizeData() {
         int featureLength = trainingData.get(0).features.length;
         featureMin = new double[featureLength];
@@ -51,7 +51,7 @@ public class NearestNeighbor {
         /*
             Normalizzazione di ogni feature dei campioni utilizzando la formula:
             (valore - minimo) / (massimo-minimo) -> 0 < sample.features[i] < 1
-         */
+        */
         for (Sample sample : trainingData) {
             for (int i = 0; i < featureLength; i++) {
                 sample.features[i] = (sample.features[i] - featureMin[i]) / (featureMax[i] - featureMin[i]);
@@ -60,9 +60,9 @@ public class NearestNeighbor {
     }
 
     /*
-     * Metodo per normalizzare un singolo Sample (non nel trainingData)
-     * usando i min e max calcolati dal dataset di training.
-     */
+       Metodo per normalizzare un singolo Sample (non nel trainingData)
+       usando i min e max calcolati dal dataset di training.
+    */
     public void normalizeSample(Sample sample) {
         if (featureMin == null || featureMax == null || featureMin.length == 0) {
             System.err.println("Errore: featureMin o featureMax non sono stati inizializzati o sono vuoti. Assicurati che i dati di training siano stati letti e normalizzati correttamente.");
@@ -93,7 +93,7 @@ public class NearestNeighbor {
     /*
         Legge i dati da un file CSV e li aggiunge alla lista trainingData,
         saltando la prima riga se corrisponde all'intestazione.
-     */
+    */
     private void readPointsFromCSV(String filename) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
