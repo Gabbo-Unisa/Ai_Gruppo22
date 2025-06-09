@@ -16,8 +16,8 @@ public class NearestNeighbor {
 
     public NearestNeighbor(String filename) {
         this.trainingData = new ArrayList<>();
-        this.classCounts = new int[13]; // Assumiamo 10 possibili classi, da -1 a 8
-        this.firstLineOfTheFile = "angle;curLapTime;distFromStart;speedX;speedY;track_0;track_1;track_2;track_3;track_4;track_5;track_6;track_7;track_8;track_9;track_10;track_11;track_12;track_13;track_14;track_15;track_16;track_17;track_18;trackPos;class";
+        this.classCounts = new int[10]; // Assumiamo 10 possibili classi, da -1 a 8
+        this.firstLineOfTheFile = "angle;distFromStart;speedX;track_2;track_4;track_6;track_8;track_9;track_10;track_12;track_14;track_16;trackPos;class";
         this.readPointsFromCSV(filename);
         normalizeData();
         this.kdtree = new KDTree(trainingData);
