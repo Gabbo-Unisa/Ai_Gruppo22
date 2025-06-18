@@ -269,7 +269,9 @@ public class KnnDriver extends Controller {
          Quando l'angolo si riduce, "stuck" viene riportata a 0 per indicare che l'auto è
          uscita dalla situaizone di difficoltà
          **/
-        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle) {
+        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle ||
+                sensors.getTrackPosition() < -1 || sensors.getTrackPosition() > 1 ||
+                sensors.getSpeed() == 0) {
             // update stuck counter
             stuck++;
         } else {
@@ -297,12 +299,34 @@ public class KnnDriver extends Controller {
             if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
                 gear = 1;
                 steer = -steer;
+
             }
+
+            // Una volta che l'auto è orientata nel verso corretto della pista deve sterzare
+            // a dx se si trova alla sx della pista
+            // a sx se si trova alla dx della pista
+
+            // Se l'auto è orientata correttamente, sterza verso il centro della pista
+            while (steer == (float) (-sensors.getAngleToTrackAxis() / steerLock) &&
+                    (sensors.getTrackPosition() > 1 || sensors.getTrackPosition() < -1) ||
+                    sensors.getSpeed() == 0) {// a questo punto potrei fare anche while(true)
+                if (sensors.getTrackPosition() > 0) {
+                    // L'auto è a destra della pista, sterza a sinistra
+                    steer = -Math.abs(steer);
+                } else if (sensors.getTrackPosition() < 0) {
+                    // L'auto è a sinistra della pista, sterza a destra
+                    steer = Math.abs(steer);
+                } else {
+                    // L'auto è al centro, nessuna sterzata aggiuntiva
+                    steer = 0;
+                }
+            }
+
             clutch = clutching(sensors, clutch);
             // Costruire una variabile CarControl e restituirla
             knnAction.gear = gear;
             knnAction.steering = steer;
-            knnAction.accelerate = 1.0;
+            knnAction.accelerate = 5.0;
             knnAction.brake = 0;
             knnAction.clutch = clutch;
             return knnAction;
