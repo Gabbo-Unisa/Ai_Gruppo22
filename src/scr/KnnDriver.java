@@ -105,70 +105,6 @@ public class KnnDriver extends Controller {
                 return gear;
     }
 
-    private float getSteer(SensorModel sensors) {
-        /** L'angolo di sterzata viene calcolato correggendo l'angolo effettivo della vettura
-         * rispetto all'asse della pista [sensors.getAngle()] e regolando la posizione della vettura
-         * rispetto al centro della pista [sensors.getTrackPos()*0,5].
-         */
-        float targetAngle = (float) (sensors.getAngleToTrackAxis() - sensors.getTrackPosition() * 0.5);
-        // ad alta velocità ridurre il comando di sterzata per evitare di perdere il controllo
-        if (sensors.getSpeed() > steerSensitivityOffset)
-            return (float) (targetAngle
-                    / (steerLock * (sensors.getSpeed() - steerSensitivityOffset) * wheelSensitivityCoeff));
-        else
-            return (targetAngle) / steerLock;
-    }
-
-    private float getAccel(SensorModel sensors) {
-        // controlla se l'auto è fuori dalla carreggiata
-        if (sensors.getTrackPosition() > -1 && sensors.getTrackPosition() < 1) {
-            // lettura del sensore a +5 gradi rispetto all'asse dell'automobile
-            float rxSensor = (float) sensors.getTrackEdgeSensors()[10];
-            // lettura del sensore parallelo all'asse della vettura
-            float sensorsensor = (float) sensors.getTrackEdgeSensors()[9];
-            // lettura del sensore a -5 gradi rispetto all'asse dell'automobile
-            float sxSensor = (float) sensors.getTrackEdgeSensors()[8];
-
-            float targetSpeed;
-
-            // Se la pista è rettilinea e abbastanza lontana da una curva, quindi va alla massima velocità
-            if (sensorsensor > maxSpeedDist || (sensorsensor >= rxSensor && sensorsensor >= sxSensor))
-                targetSpeed = maxSpeed;
-            else {
-                // In prossimità di una curva a destra
-                if (rxSensor > sxSensor) {
-
-                    // Calcolo dell'"angolo" di sterzata
-                    float h = sensorsensor * sin5;
-                    float b = rxSensor - sensorsensor * cos5;
-                    float sinAngle = b * b / (h * h + b * b);
-
-                    // Set della velocità in base alla curva
-                    targetSpeed = maxSpeed * (sensorsensor * sinAngle / maxSpeedDist);
-                }
-                // In prossimità di una curva a sinistra
-                else {
-                    // Calcolo dell'"angolo" di sterzata
-                    float h = sensorsensor * sin5;
-                    float b = sxSensor - sensorsensor * cos5;
-                    float sinAngle = b * b / (h * h + b * b);
-
-                    // eSet della velocità in base alla curva
-                    targetSpeed = maxSpeed * (sensorsensor * sinAngle / maxSpeedDist);
-                }
-            }
-
-            /**
-             * Il comando di accelerazione/frenata viene scalato in modo esponenziale rispetto
-             * alla differenza tra velocità target e quella attuale
-             */
-            return (float) (2 / (1 + Math.exp(sensors.getSpeed() - targetSpeed)) - 1);
-        } else
-            // Quando si esce dalla carreggiata restituisce un comando di accelerazione moderata
-            return (float) 0.3;
-    }
-
-
 
     private float filterABS(SensorModel sensors, float brake) {
         // Converte la velocità in m/s
@@ -269,9 +205,7 @@ public class KnnDriver extends Controller {
          Quando l'angolo si riduce, "stuck" viene riportata a 0 per indicare che l'auto è
          uscita dalla situaizone di difficoltà
          **/
-        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle ||
-                sensors.getTrackPosition() < -1 || sensors.getTrackPosition() > 1 ||
-                sensors.getSpeed() == 0) {
+        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle) {
             // update stuck counter
             stuck++;
         } else {
@@ -299,34 +233,12 @@ public class KnnDriver extends Controller {
             if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
                 gear = 1;
                 steer = -steer;
-
             }
-
-            // Una volta che l'auto è orientata nel verso corretto della pista deve sterzare
-            // a dx se si trova alla sx della pista
-            // a sx se si trova alla dx della pista
-
-            // Se l'auto è orientata correttamente, sterza verso il centro della pista
-            while (steer == (float) (-sensors.getAngleToTrackAxis() / steerLock) &&
-                    (sensors.getTrackPosition() > 1 || sensors.getTrackPosition() < -1) ||
-                    sensors.getSpeed() == 0) {// a questo punto potrei fare anche while(true)
-                if (sensors.getTrackPosition() > 0) {
-                    // L'auto è a destra della pista, sterza a sinistra
-                    steer = -Math.abs(steer);
-                } else if (sensors.getTrackPosition() < 0) {
-                    // L'auto è a sinistra della pista, sterza a destra
-                    steer = Math.abs(steer);
-                } else {
-                    // L'auto è al centro, nessuna sterzata aggiuntiva
-                    steer = 0;
-                }
-            }
-
             clutch = clutching(sensors, clutch);
             // Costruire una variabile CarControl e restituirla
             knnAction.gear = gear;
             knnAction.steering = steer;
-            knnAction.accelerate = 5.0;
+            knnAction.accelerate = 1.0;
             knnAction.brake = 0;
             knnAction.clutch = clutch;
             return knnAction;
