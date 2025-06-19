@@ -271,17 +271,13 @@ public class KnnDriver extends Controller {
          **/
         if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle ||
                 sensors.getTrackPosition() < -1 || sensors.getTrackPosition() > 1 ||
-                (sensors.getSpeed() >= -1 && sensors.getSpeed() <= 1)) {
+                sensors.getSpeed() == 0) {
             // update stuck counter
             stuck++;
         } else {
             // if not stuck reset stuck counter
             stuck = 0;
         }
-
-        /*if (sensors.getSpeed() >= -1 && sensors.getSpeed() <= 1) {
-
-        }*/
 
         // Applicare la polizza di recupero o meno in base al tempo trascorso
         /**
@@ -306,38 +302,24 @@ public class KnnDriver extends Controller {
 
             }
 
-            if( sensors.getAngleToTrackAxis() < 0.1 && sensors.getAngleToTrackAxis() > -0.1 &&
-                sensors.getTrackPosition() >= 1) {
-                // L'auto è allineata alla tangente della pista ma è fuori dal tracciato, gira a destra
-                steer = Math.abs(steer);
-            } else if( sensors.getAngleToTrackAxis() < 0.1 && sensors.getAngleToTrackAxis() > -0.1 &&
-                    sensors.getTrackPosition() <= -1) {
-                // L'auto è allineata alla tangente della pista ma è fuori dal tracciato, gira a sinistra
-                steer = -Math.abs(steer);
-            }
-
             // Una volta che l'auto è orientata nel verso corretto della pista deve sterzare
             // a dx se si trova alla sx della pista
             // a sx se si trova alla dx della pista
 
             // Se l'auto è orientata correttamente, sterza verso il centro della pista
             while (steer == (float) (-sensors.getAngleToTrackAxis() / steerLock) &&
-                    (sensors.getTrackPosition() > 1 || sensors.getTrackPosition() < -1)) {// a questo punto potrei fare anche while(true)
+                    (sensors.getTrackPosition() > 1 || sensors.getTrackPosition() < -1) ||
+                    sensors.getSpeed() == 0) {// a questo punto potrei fare anche while(true)
                 if (sensors.getTrackPosition() > 0) {
                     // L'auto è a destra della pista, sterza a sinistra
                     steer = -Math.abs(steer);
                 } else if (sensors.getTrackPosition() < 0) {
                     // L'auto è a sinistra della pista, sterza a destra
                     steer = Math.abs(steer);
-                } /*else if( sensors.getAngleToTrackAxis() < 0.1 && sensors.getAngleToTrackAxis() > -0.1 &&
-                        sensors.getTrackPosition() >= 1) {
-                    // L'auto è allineata alla tangente della pista ma è fuori dal tracciato, gira a destra
-                    steer = Math.abs(steer);
-                } else if( sensors.getAngleToTrackAxis() < 0.1 && sensors.getAngleToTrackAxis() > -0.1 &&
-                        sensors.getTrackPosition() <= -1) {
-                    // L'auto è allineata alla tangente della pista ma è fuori dal tracciato, gira a sinistra
-                    steer = -Math.abs(steer);
-                }*/
+                } else {
+                    // L'auto è al centro, nessuna sterzata aggiuntiva
+                    steer = 0;
+                }
             }
 
             clutch = clutching(sensors, clutch);
