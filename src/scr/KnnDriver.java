@@ -236,10 +236,9 @@ public class KnnDriver extends Controller {
             int gear = -1; // Retromarcia
 
             // Se l'auto è orientata nella direzione corretta invertire la marcia e sterzare
-            if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
-                gear = 1;
-                steer = -steer;
-
+            if (Math.abs(sensors.getAngleToTrackAxis()) < 0.2 && Math.abs(sensors.getTrackPosition()) > 1.0) {
+                gear = -1; // sempre retro
+                steer = (sensors.getTrackPosition() < 0) ? 0.5f : -0.5f; // forza la sterzata verso il centro pista
             }
 
             if( sensors.getAngleToTrackAxis() < 0.1 && sensors.getAngleToTrackAxis() > -0.1 &&
