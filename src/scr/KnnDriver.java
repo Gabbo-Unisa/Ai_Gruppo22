@@ -265,7 +265,7 @@ public class KnnDriver extends Controller {
             // Costruire una variabile CarControl e restituirla
             knnAction.gear = gear;
             knnAction.steering = steer;
-            knnAction.accelerate = 0.5;
+            knnAction.accelerate = 1.0;
             knnAction.brake = 0;
             knnAction.clutch = clutch;
             return knnAction;
